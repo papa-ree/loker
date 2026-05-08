@@ -1,0 +1,54 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('loker', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            
+            // Perusahaan
+            $table->string('nama_perusahaan');
+            $table->text('deskripsi_perusahaan')->nullable();
+            $table->string('url_perusahaan')->nullable();
+            $table->text('alamat_perusahaan')->nullable();
+            
+            // Pekerjaan
+            $table->string('nama_pekerjaan');
+            $table->text('deskripsi_pekerjaan')->nullable();
+            $table->string('lokasi')->nullable();
+            $table->string('gaji')->nullable();
+            $table->string('tipe')->nullable(); // misal: Full-time, Freelance
+            $table->string('kategory')->nullable();
+            
+            // Cara melamar & Kualifikasi
+            $table->text('apply')->nullable();
+            $table->json('persyaratan_kualifikasi')->nullable();
+            
+            // Masa Berlaku
+            $table->date('tgl_berakhir')->nullable();
+            
+            // Tambahan untuk CMS
+            $table->string('slug')->unique();
+            $table->boolean('actived')->default(true);
+            
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('loker');
+    }
+};
