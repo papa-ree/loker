@@ -32,10 +32,10 @@ class MigrateLoker extends Command
 
         try {
             $tenant = BaleList::where('slug', $tenantSlug)->firstOrFail();
-            
+
             $this->info("Publishing Loker migrations...");
             $this->call('vendor:publish', [
-                '--tag'   => 'loker:migrations',
+                '--tag' => 'loker:migrations',
                 '--force' => true,
             ]);
 
@@ -51,8 +51,8 @@ class MigrateLoker extends Command
 
             $this->call('migrate', [
                 '--database' => $connection,
-                '--path'     => 'database/migrations/tenant',
-                '--force'    => true,
+                '--path' => 'database/migrations/loker',
+                '--force' => true,
             ]);
 
             $this->info("Migration for tenant {$tenant->slug} completed.");

@@ -136,7 +136,7 @@ class LokerServiceProvider extends ServiceProvider
         $migrationName = str_replace('.php.stub', '.php', $filename);
         $migrationName = str_replace('.stub', '', $migrationName);
 
-        return database_path('migrations/tenant/' . $migrationName);
+        return database_path('migrations/loker/' . $migrationName);
     }
 
     /**
