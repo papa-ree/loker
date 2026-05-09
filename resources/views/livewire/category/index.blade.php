@@ -1,10 +1,10 @@
 <div>
-    <x-core::breadcrumb :active="__('Kategori Lowongan')" />
+    <x-core::breadcrumb :active="__('Manajemen Kategori')" />
 
     <div class="mt-6">
-        <livewire:loker.category.section.category-header />
+        <livewire:loker.category.section.header />
         <div class="mt-8">
-            <livewire:loker.category.section.category-table />
+            <livewire:loker.category.section.table />
         </div>
     </div>
 </div>

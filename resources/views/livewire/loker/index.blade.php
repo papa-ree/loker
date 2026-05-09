@@ -1,4 +1,4 @@
 <div>
-    <livewire:loker.loker.section.loker-header />
-    <livewire:loker.loker.section.loker-table />
+    <livewire:loker.loker.section.header />
+    <livewire:loker.loker.section.table />
 </div>

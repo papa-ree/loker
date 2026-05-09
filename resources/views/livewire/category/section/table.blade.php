@@ -1,28 +1,29 @@
 <div>
-    <livewire:core-shared-components::data-table 
-        model="Bale\Loker\Models\Category"
-        rowView="loker::livewire.category.row"
-        connectionResolver="Bale\Cms\Services\TenantConnectionService::resolveForQuery" 
-        :columns="[
-            [
-                'key' => 'name',
-                'label' => __('Nama Kategori'),
-                'sortable' => true,
-            ],
-            [
-                'key' => 'actived',
-                'label' => __('Status'),
-                'sortable' => true,
-            ],
-            [
-                'key' => 'actions',
-                'label' => '',
-                'sortable' => false,
-            ],
-        ]"
-        :searchable="['name', 'description']" 
+    <livewire:core-shared-components::data-table model="Bale\Loker\Models\Category"
+        rowView="loker::livewire.category.section.row"
+        connectionResolver="Bale\Cms\Services\TenantConnectionService::resolveForQuery" :columns="[
+        [
+            'key' => 'name',
+            'label' => __('Kategori'),
+            'sortable' => true,
+        ],
+        [
+            'key' => 'slug',
+            'label' => __('Slug'),
+            'sortable' => true,
+        ],
+        [
+            'key' => 'actived',
+            'label' => __('Status'),
+            'sortable' => true,
+        ],
+        [
+            'key' => 'actions',
+            'label' => '',
+            'sortable' => false,
+        ],
+    ]"
+        :searchable="['name', 'slug', 'description']" 
         sortField="name"
-        sortDirection="asc" 
-        :perPage="20" 
-    />
+        sortDirection="asc" :perPage="20" />
 </div>

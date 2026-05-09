@@ -1,58 +1,85 @@
-<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-    <td class="px-6 py-4">
-        <div class="flex flex-col">
-            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $record->nama_pekerjaan }}</span>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $record->tipe }} • {{ $record->kategory }}</span>
+<tr wire:key="loker-row-{{ $record->id }}"
+    class="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors duration-150">
+
+    {{-- Job & Company --}}
+    <td class="px-4 py-3.5 w-full max-w-0 sm:max-w-none sm:w-auto">
+        <div class="flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-linear-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/30 flex items-center justify-center shrink-0 border border-indigo-200/50 dark:border-indigo-700/30">
+                <x-lucide-briefcase class="size-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                    {{ $record->nama_pekerjaan }}
+                </span>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {{ $record->nama_perusahaan }}
+                    </span>
+                    <span class="text-gray-300 dark:text-gray-600">•</span>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        {{ $record->tipe }}
+                    </span>
+                </div>
+            </div>
         </div>
     </td>
-    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-        {{ $record->nama_perusahaan }}
+
+    {{-- Location --}}
+    <td class="px-4 py-3.5 text-sm text-gray-600 dark:text-gray-300">
+        <div class="flex items-center gap-1.5">
+            <x-lucide-map-pin class="size-3.5 text-gray-400" />
+            <span>{{ $record->lokasi }}</span>
+        </div>
     </td>
-    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-        {{ $record->lokasi }}
-    </td>
-    <td class="px-6 py-4">
-        <div class="flex flex-col">
-            @if($record->tgl_berakhir)
-                <span class="text-sm {{ $record->is_expired ? 'text-rose-600 font-bold' : '' }}">
+
+    {{-- Expiry Date --}}
+    <td class="px-4 py-3.5">
+        @if($record->tgl_berakhir)
+            <div class="flex flex-col">
+                <span class="text-sm font-medium {{ $record->is_expired ? 'text-rose-600 dark:text-rose-400' : 'text-gray-700 dark:text-gray-300' }}">
                     {{ $record->tgl_berakhir->format('d M Y') }}
                 </span>
-                <span class="text-[10px] uppercase tracking-tighter text-gray-400">
-                    {{ $record->is_expired ? __('Sudah Berakhir') : __('Hingga') }}
+                <span class="text-[10px] uppercase font-bold tracking-widest {{ $record->is_expired ? 'text-rose-400' : 'text-gray-400' }}">
+                    {{ $record->is_expired ? __('EXPIRED') : __('Hingga') }}
                 </span>
-            @else
-                <span class="text-gray-400 italic text-xs">{{ __('Tanpa batas') }}</span>
-            @endif
-        </div>
+            </div>
+        @else
+            <span class="text-gray-400 italic text-xs">{{ __('Tanpa batas') }}</span>
+        @endif
     </td>
-    <td class="px-6 py-4">
+
+    {{-- Status --}}
+    <td class="px-4 py-3.5">
         @if($record->is_expired)
-            <span
-                class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400">
-                Expired
+            <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20 dark:bg-rose-900/30 dark:text-rose-400">
+                <span class="size-1.5 rounded-full bg-rose-500"></span>
+                {{ __('Kadaluarsa') }}
             </span>
         @elseif($record->actived)
-            <span
-                class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-800/30 dark:text-emerald-400">
+            <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-teal-50 text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-900/30 dark:text-teal-400">
                 <span class="relative flex h-2 w-2">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
                 </span>
-                Aktif
+                {{ __('Aktif') }}
             </span>
         @else
-            <span
-                class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
-                Non-aktif
+            <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20 dark:bg-gray-800/50 dark:text-gray-400">
+                <span class="size-1.5 rounded-full bg-gray-400"></span>
+                {{ __('Non-aktif') }}
             </span>
         @endif
     </td>
-    <td class="px-6 py-4 whitespace-nowrap w-px">
+
+    {{-- Actions --}}
+    <td class="px-4 py-3.5 whitespace-nowrap w-px">
         @canany(['loker.update', 'loker.delete'])
-            <livewire:core.shared-components.item-actions :editUrl="route('loker.loker.edit', $record->id)"
-                :deleteId="$record->id" :navigate="true" wire:key="loker-actions-{{ $record->id }}"
-                confirmMessage="{{ __('Apakah Anda yakin ingin menghapus lowongan ini?') }}" />
+            <livewire:core.shared-components.item-actions 
+                :editUrl="route('loker.loker.edit', $record->id)"
+                :deleteId="$record->id" 
+                :navigate="true" 
+                confirmMessage="{{ __('Yakin ingin menghapus lowongan ini?') }}"
+                wire:key="item-actions-{{ $record->id }}" />
         @endcanany
     </td>
 </tr>

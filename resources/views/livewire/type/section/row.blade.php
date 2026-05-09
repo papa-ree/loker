@@ -1,0 +1,52 @@
+<tr wire:key="type-row-{{ $record->id }}"
+    class="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors duration-150">
+
+    {{-- Type Name & Description --}}
+    <td class="px-4 py-3.5 w-full max-w-0 sm:max-w-none sm:w-auto">
+        <div class="flex items-center gap-3">
+            <div
+                class="size-9 rounded-lg bg-linear-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/30 flex items-center justify-center shrink-0 border border-indigo-200/50 dark:border-indigo-700/30">
+                <x-lucide-briefcase class="size-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                    {{ $record->name }}
+                </span>
+                @if($record->description)
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                        {{ $record->description }}
+                    </p>
+                @endif
+            </div>
+        </div>
+    </td>
+
+    {{-- Status --}}
+    <td class="px-4 py-3.5 text-sm">
+        @if($record->actived)
+            <span
+                class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-teal-50 text-teal-700 ring-1 ring-inset ring-teal-600/20 dark:bg-teal-900/30 dark:text-teal-400">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                </span>
+                {{ __('Aktif') }}
+            </span>
+        @else
+            <span
+                class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20 dark:bg-gray-800/50 dark:text-gray-400">
+                <span class="size-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
+                {{ __('Non-aktif') }}
+            </span>
+        @endif
+    </td>
+
+    {{-- Actions --}}
+    <td class="px-4 py-3.5 whitespace-nowrap w-px">
+        <livewire:core.shared-components.item-actions :editUrl="route('loker.type.edit', $record->id)"
+            :deleteId="$record->id" :navigate="false"
+            confirmMessage="{{ __('Yakin ingin menghapus tipe pekerjaan ini?') }}"
+            wire:key="item-actions-{{ $record->id }}" />
+    </td>
+</tr>

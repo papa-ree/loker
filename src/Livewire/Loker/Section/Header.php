@@ -4,7 +4,7 @@ namespace Bale\Loker\Livewire\Loker\Section;
 
 use Livewire\Component;
 
-class LokerHeader extends Component
+class Header extends Component
 {
     public function render()
     {

@@ -4,7 +4,7 @@ namespace Bale\Loker\Livewire\Company\Section;
 
 use Livewire\Component;
 
-class CompanyHeader extends Component
+class Header extends Component
 {
     public function render()
     {
