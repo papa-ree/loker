@@ -334,5 +334,214 @@
             </div>
 
         </div>
+
+        {{-- ── VISITOR ANALYTICS SECTION ── --}}
+        <div class="space-y-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-xl">
+                    <x-lucide-bar-chart-2 class="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">{{ __('Analitik Kunjungan Loker') }}</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Data pageview & visitor per lowongan dari Umami Analytics.') }}</p>
+                </div>
+                <div class="ml-auto">
+                    <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-full">
+                        {{ __('30 Hari Terakhir') }}
+                    </span>
+                </div>
+            </div>
+
+            {{-- Stat Cards: Total Pageviews & Visitors --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {{-- Total Pageviews --}}
+                <div class="relative group overflow-hidden p-6 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-violet-50 dark:bg-violet-900/10 rounded-full opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+                    <div class="relative flex items-center justify-between mb-5">
+                        <div class="p-3 bg-violet-100 dark:bg-violet-900/30 rounded-xl group-hover:bg-violet-600 transition-colors duration-300">
+                            <x-lucide-eye class="w-6 h-6 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors" />
+                        </div>
+                        <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest">{{ __('Total') }}</span>
+                    </div>
+                    <h4 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {{ number_format($visitorAggregate->total_pageviews ?? 0) }}
+                    </h4>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">{{ __('Total Pageview Loker') }}</p>
+                </div>
+
+                {{-- Total Unique Visitors --}}
+                <div class="relative group overflow-hidden p-6 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-sky-50 dark:bg-sky-900/10 rounded-full opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+                    <div class="relative flex items-center justify-between mb-5">
+                        <div class="p-3 bg-sky-100 dark:bg-sky-900/30 rounded-xl group-hover:bg-sky-600 transition-colors duration-300">
+                            <x-lucide-users class="w-6 h-6 text-sky-600 dark:text-sky-400 group-hover:text-white transition-colors" />
+                        </div>
+                        <span class="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest">{{ __('Unik') }}</span>
+                    </div>
+                    <h4 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {{ number_format($visitorAggregate->total_visitors ?? 0) }}
+                    </h4>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">{{ __('Total Pengunjung Unik') }}</p>
+                </div>
+            </div>
+
+            {{-- Chart + Top Loker grid --}}
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                {{-- Chart 30 hari --}}
+                <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-md p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h4 class="text-base font-black text-slate-900 dark:text-white">{{ __('Tren Kunjungan') }}</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ __('Pageview & visitor harian semua loker') }}</p>
+                        </div>
+                        <div class="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400">
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-3 h-1 rounded-full bg-violet-500 inline-block"></span>{{ __('Pageviews') }}
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-3 h-1 rounded-full bg-sky-400 inline-block"></span>{{ __('Visitors') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div wire:ignore>
+                        <canvas id="loker-visitor-chart" height="220"></canvas>
+                    </div>
+                </div>
+
+                {{-- Top Loker by Pageviews --}}
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-md p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="text-base font-black text-slate-900 dark:text-white">{{ __('Top Loker Dikunjungi') }}</h4>
+                        <x-lucide-trophy class="w-5 h-5 text-amber-400" />
+                    </div>
+
+                    @if($topLokerByViews->isEmpty())
+                        <div class="flex flex-col items-center justify-center py-10 text-slate-400">
+                            <x-lucide-bar-chart class="w-10 h-10 mb-3 opacity-30" />
+                            <p class="text-sm italic">{{ __('Belum ada data kunjungan.') }}</p>
+                            <p class="text-xs mt-1 opacity-60">{{ __('Jalankan loker:sync-visitors untuk sinkronisasi.') }}</p>
+                        </div>
+                    @else
+                        <div class="space-y-4">
+                            @foreach($topLokerByViews as $index => $item)
+                                @php
+                                    $maxViews = $topLokerByViews->max('total_pageviews') ?: 1;
+                                    $pct      = round(($item->total_pageviews / $maxViews) * 100);
+                                    $colors   = ['bg-violet-500','bg-sky-500','bg-emerald-500','bg-amber-500','bg-rose-500'];
+                                    $color    = $colors[$index % 5];
+                                @endphp
+                                <div class="group">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="shrink-0 w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-500">
+                                                {{ $index + 1 }}
+                                            </span>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-violet-600 transition-colors">
+                                                    {{ $item->nama_pekerjaan }}
+                                                </p>
+                                                <p class="text-[11px] text-slate-400 truncate">{{ $item->nama_perusahaan }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0 ml-2 text-right">
+                                            <p class="text-sm font-black text-slate-700 dark:text-slate-300">{{ number_format($item->total_pageviews) }}</p>
+                                            <p class="text-[10px] text-slate-400">{{ number_format($item->total_visitors) }} unik</p>
+                                        </div>
+                                    </div>
+                                    <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                        <div class="h-full {{ $color }} rounded-full transition-all duration-1000" style="width: {{ $pct }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('loker-visitor-chart');
+    if (!ctx) return;
+
+    const labels    = @js($visitorChart['labels']);
+    const pageviews = @js($visitorChart['pageviews']);
+    const visitors  = @js($visitorChart['visitors']);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const labelColor = isDark ? '#94a3b8' : '#64748b';
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Pageviews',
+                    data: pageviews,
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139,92,246,0.12)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.4,
+                },
+                {
+                    label: 'Visitors',
+                    data: visitors,
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56,189,248,0.10)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.4,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#1e293b' : '#fff',
+                    borderColor: isDark ? '#334155' : '#e2e8f0',
+                    borderWidth: 1,
+                    titleColor: labelColor,
+                    bodyColor: labelColor,
+                    padding: 10,
+                },
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: labelColor,
+                        maxTicksLimit: 8,
+                        font: { size: 10 },
+                    },
+                    grid: { color: gridColor },
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: labelColor,
+                        font: { size: 10 },
+                        precision: 0,
+                    },
+                    grid: { color: gridColor },
+                },
+            },
+        },
+    });
+});
+</script>
+@endpush

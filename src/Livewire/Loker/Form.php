@@ -10,6 +10,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Bale\Cms\Services\TenantConnectionService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Layout('cms::layouts.app')]
@@ -185,7 +186,58 @@ class Form extends Component
 
     public function render()
     {
-        return view('loker::livewire.loker.form')
+        $lokerVisitorStats = null;
+
+        if ($this->lokerId) {
+            TenantConnectionService::ensureActive();
+            $connection = TenantConnectionService::connection();
+
+            // Ambil aggregate kunjungan untuk loker ini berdasarkan slug
+            $loker = Loker::find($this->lokerId);
+
+            if ($loker) {
+                $lokerVisitorStats = DB::connection($connection)
+                    ->table('loker_visitor')
+                    ->where('loker_slug', $loker->slug)
+                    ->selectRaw('
+                        COALESCE(SUM(pageviews), 0) as total_pageviews,
+                        COALESCE(SUM(visitors), 0)  as total_visitors,
+                        COUNT(*) as total_days_tracked,
+                        MAX(date) as last_tracked_date
+                    ')
+                    ->first();
+
+                // Chart 7 hari terakhir untuk loker ini
+                $timezone  = config('core.analytics.umami.timezone', 'Asia/Jakarta');
+                $startDate = now($timezone)->subDays(6)->startOfDay()->format('Y-m-d');
+
+                $rawChart = DB::connection($connection)
+                    ->table('loker_visitor')
+                    ->selectRaw('date, pageviews, visitors')
+                    ->where('loker_slug', $loker->slug)
+                    ->where('date', '>=', $startDate)
+                    ->orderBy('date')
+                    ->get()
+                    ->keyBy(fn ($row) => $row->date);
+
+                $chartLabels = $chartPageviews = $chartVisitors = [];
+                for ($i = 6; $i >= 0; $i--) {
+                    $day = now($timezone)->subDays($i);
+                    $key = $day->format('Y-m-d');
+                    $chartLabels[]    = $day->format('M d');
+                    $chartPageviews[] = (int) ($rawChart->get($key)?->pageviews ?? 0);
+                    $chartVisitors[]  = (int) ($rawChart->get($key)?->visitors ?? 0);
+                }
+
+                $lokerVisitorStats->chart = [
+                    'labels'    => $chartLabels,
+                    'pageviews' => $chartPageviews,
+                    'visitors'  => $chartVisitors,
+                ];
+            }
+        }
+
+        return view('loker::livewire.loker.form', compact('lokerVisitorStats'))
             ->title($this->lokerId ? 'Edit Lowongan' : 'Tambah Lowongan');
     }
 }

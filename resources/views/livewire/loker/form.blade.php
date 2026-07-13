@@ -15,6 +15,56 @@
     <form @submit.prevent="saveLoker($event)">
         <div class="max-w-4xl mx-auto mt-6 space-y-6">
 
+            {{-- ── ANALYTICS PREVIEW (Only on Edit Mode) ── --}}
+            @if($lokerId && $lokerVisitorStats)
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden p-6 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <x-lucide-bar-chart-3 class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ __('Statistik Kunjungan Lowongan') }}</h3>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                                {{ __('Kinerja dan kunjungan pelamar pada lowongan ini.') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">{{ __('Total Pageviews') }}</span>
+                                <h4 class="text-2xl font-black text-slate-800 dark:text-white mt-1">{{ number_format($lokerVisitorStats->total_pageviews) }}</h4>
+                            </div>
+                            <x-lucide-eye class="w-8 h-8 text-indigo-500 opacity-60" />
+                        </div>
+
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">{{ __('Visitors Unik') }}</span>
+                                <h4 class="text-2xl font-black text-slate-800 dark:text-white mt-1">{{ number_format($lokerVisitorStats->total_visitors) }}</h4>
+                            </div>
+                            <x-lucide-users class="w-8 h-8 text-sky-500 opacity-60" />
+                        </div>
+                    </div>
+
+                    @if($lokerVisitorStats->total_pageviews > 0 && !empty($lokerVisitorStats->chart))
+                        <div class="bg-slate-50 dark:bg-slate-800/20 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ __('Tren Kunjungan (7 Hari Terakhir)') }}</span>
+                                <div class="flex gap-3 text-[10px] text-slate-400">
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-1.5 rounded-full bg-indigo-500 inline-block"></span>Pageviews</span>
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-1.5 rounded-full bg-sky-500 inline-block"></span>Visitors</span>
+                                </div>
+                            </div>
+                            <div wire:ignore class="h-44">
+                                <canvas id="loker-individual-chart"></canvas>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             {{-- ── PAGE TITLE ── --}}
             <div class="flex items-center justify-between">
                 <div>
@@ -460,6 +510,71 @@
 
         // Initialize immediately (handles initial load and wire:navigate)
         initEditor();
+
+        // Initialize individual line chart if dataset is present
+        const initIndividualChart = () => {
+            const ctx = document.getElementById('loker-individual-chart');
+            if (!ctx) return;
+
+            const chartData = @js($lokerVisitorStats ? $lokerVisitorStats->chart ?? null : null);
+            if (!chartData) return;
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const labelColor = isDark ? '#94a3b8' : '#64748b';
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [
+                        {
+                            label: 'Pageviews',
+                            data: chartData.pageviews,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Visitors',
+                            data: chartData.visitors,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.05)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: labelColor, font: { size: 9 } },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: labelColor, font: { size: 9 }, precision: 0 },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+        };
+
+        initIndividualChart();
 
         window.saveLoker = async function ( event )
         {

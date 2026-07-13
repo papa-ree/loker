@@ -48,6 +48,24 @@
         @endif
     </td>
 
+    {{-- Visitors (PV / UV) --}}
+    @php
+        $sumPageviews = $record->visitors ? $record->visitors->sum('pageviews') : 0;
+        $sumVisitors  = $record->visitors ? $record->visitors->sum('visitors') : 0;
+    @endphp
+    <td class="px-4 py-3.5 text-sm whitespace-nowrap">
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-750 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 px-2.5 py-1 rounded-lg" title="{{ __('Pageviews (Total Kunjungan Halaman)') }}">
+                <x-lucide-eye class="size-3.5 text-violet-500" />
+                {{ number_format($sumPageviews) }}
+            </span>
+            <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-750 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 px-2.5 py-1 rounded-lg" title="{{ __('Unique Visitors (Pengunjung Individu)') }}">
+                <x-lucide-users class="size-3.5 text-sky-500" />
+                {{ number_format($sumVisitors) }}
+            </span>
+        </div>
+    </td>
+
     {{-- Status --}}
     <td class="px-4 py-3.5">
         @if($record->is_expired)

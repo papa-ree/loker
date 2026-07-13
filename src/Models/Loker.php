@@ -49,4 +49,13 @@ class Loker extends Model
             get: fn() => $this->tgl_berakhir && $this->tgl_berakhir->isPast(),
         );
     }
+
+    /**
+     * Get the visitor metrics for the loker.
+     */
+    public function visitors()
+    {
+        return $this->hasMany(LokerVisitor::class, 'loker_slug', 'slug');
+    }
 }
+

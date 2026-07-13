@@ -26,6 +26,7 @@ class LokerServiceProvider extends ServiceProvider
         $commands = [
             'command.loker:install' => \Bale\Loker\Commands\InstallLoker::class,
             'command.loker:migrate' => \Bale\Loker\Commands\MigrateLoker::class,
+            'command.loker:sync-visitors' => \Bale\Loker\Commands\SyncLokerVisitors::class,
         ];
 
         foreach ($commands as $key => $class) {

@@ -1,7 +1,9 @@
 <div>
     <livewire:core-shared-components::data-table model="Bale\Loker\Models\Loker"
         rowView="loker::livewire.loker.section.row"
-        connectionResolver="Bale\Cms\Services\TenantConnectionService::resolveForQuery" :columns="[
+        connectionResolver="Bale\Cms\Services\TenantConnectionService::resolveForQuery"
+        :with="['visitors']"
+        :columns="[
         [
             'key' => 'nama_pekerjaan',
             'label' => __('Pekerjaan'),
@@ -21,6 +23,11 @@
             'key' => 'tgl_berakhir',
             'label' => __('Masa Berlaku'),
             'sortable' => true,
+        ],
+        [
+            'key' => 'visitors',
+            'label' => __('Pengunjung (PV/UV)'),
+            'sortable' => false,
         ],
         [
             'key' => 'actived',
