@@ -1,17 +1,19 @@
 <?php
 
-use Bale\Loker\Livewire\Overview\Index as OverviewIndex;
-use Bale\Loker\Livewire\Loker\Index as LokerIndex;
-use Bale\Loker\Livewire\Loker\Form as LokerForm;
-use Bale\Loker\Livewire\Category\Index as CategoryIndex;
-use Bale\Loker\Livewire\Category\Form as CategoryForm;
-use Bale\Loker\Livewire\Type\Index as TypeIndex;
-use Bale\Loker\Livewire\Type\Form as TypeForm;
-use Bale\Loker\Livewire\Company\Index as CompanyIndex;
-use Bale\Loker\Livewire\Company\Form as CompanyForm;
-use Illuminate\Support\Facades\Route;
 use Bale\Cms\Middleware\EnsureBaleSelected;
 use Bale\Cms\Middleware\SwitchBaleConnection;
+use Bale\Cms\Models\BaleList;
+use Bale\Loker\Jobs\SyncLokerVisitorsJob;
+use Bale\Loker\Livewire\Category\Form as CategoryForm;
+use Bale\Loker\Livewire\Category\Index as CategoryIndex;
+use Bale\Loker\Livewire\Company\Form as CompanyForm;
+use Bale\Loker\Livewire\Company\Index as CompanyIndex;
+use Bale\Loker\Livewire\Loker\Form as LokerForm;
+use Bale\Loker\Livewire\Loker\Index as LokerIndex;
+use Bale\Loker\Livewire\Overview\Index as OverviewIndex;
+use Bale\Loker\Livewire\Type\Form as TypeForm;
+use Bale\Loker\Livewire\Type\Index as TypeIndex;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +27,7 @@ use Bale\Cms\Middleware\SwitchBaleConnection;
 
 Route::middleware(['web', 'auth'])->prefix('cms/loker')->name('loker.')->group(function () {
     Route::middleware([EnsureBaleSelected::class, SwitchBaleConnection::class])->group(function () {
-        
+
         // Overview
         Route::get('/overview', OverviewIndex::class)->name('overview');
 
@@ -56,6 +58,17 @@ Route::middleware(['web', 'auth'])->prefix('cms/loker')->name('loker.')->group(f
             Route::get('/create', CompanyForm::class)->name('create');
             Route::get('/edit/{id}', CompanyForm::class)->name('edit');
         });
+
+        // Sync Visitor Stats
+        Route::post('/sync-visitors', function () {
+            $tenant = BaleList::where('slug', session('bale_active_slug'))->first();
+
+            if ($tenant) {
+                SyncLokerVisitorsJob::dispatch($tenant->id);
+            }
+
+            return response()->json(['status' => 'ok']);
+        })->name('sync-visitors');
 
     });
 });

@@ -213,12 +213,12 @@ class Form extends Component
 
                 $rawChart = DB::connection($connection)
                     ->table('loker_visitor')
-                    ->selectRaw('date, pageviews, visitors')
+                    ->selectRaw("DATE_FORMAT(date, '%Y-%m-%d') as date_key, pageviews, visitors")
                     ->where('loker_slug', $loker->slug)
                     ->where('date', '>=', $startDate)
-                    ->orderBy('date')
+                    ->orderBy('date_key')
                     ->get()
-                    ->keyBy(fn ($row) => $row->date);
+                    ->keyBy('date_key');
 
                 $chartLabels = $chartPageviews = $chartVisitors = [];
                 for ($i = 6; $i >= 0; $i--) {

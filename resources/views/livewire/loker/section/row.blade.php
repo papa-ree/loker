@@ -1,7 +1,7 @@
 <tr wire:key="loker-row-{{ $record->id }}"
     class="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors duration-150">
 
-    {{-- Job & Company --}}
+    {{-- Pekerjaan --}}
     <td class="px-4 py-3.5 w-full max-w-0 sm:max-w-none sm:w-auto">
         <div class="flex items-center gap-3">
             <div class="size-10 rounded-xl bg-linear-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/30 flex items-center justify-center shrink-0 border border-indigo-200/50 dark:border-indigo-700/30">
@@ -24,7 +24,18 @@
         </div>
     </td>
 
-    {{-- Location --}}
+    {{-- Kategori --}}
+    <td class="px-4 py-3.5 text-sm text-gray-600 dark:text-gray-300">
+        @if($record->kategory)
+            <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30">
+                {{ $record->kategory }}
+            </span>
+        @else
+            <span class="text-xs text-gray-400 italic">—</span>
+        @endif
+    </td>
+
+    {{-- Lokasi --}}
     <td class="px-4 py-3.5 text-sm text-gray-600 dark:text-gray-300">
         <div class="flex items-center gap-1.5">
             <x-lucide-map-pin class="size-3.5 text-gray-400" />
@@ -32,7 +43,19 @@
         </div>
     </td>
 
-    {{-- Expiry Date --}}
+    {{-- Gaji --}}
+    <td class="px-4 py-3.5 text-sm whitespace-nowrap">
+        @if($record->gaji)
+            <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 px-2 py-1 rounded-lg">
+                <x-lucide-dollar-sign class="size-3" />
+                {{ $record->gaji }}
+            </span>
+        @else
+            <span class="text-xs text-gray-400 italic">—</span>
+        @endif
+    </td>
+
+    {{-- Masa Berlaku --}}
     <td class="px-4 py-3.5">
         @if($record->tgl_berakhir)
             <div class="flex flex-col">
@@ -48,7 +71,7 @@
         @endif
     </td>
 
-    {{-- Visitors (PV / UV) --}}
+    {{-- Pengunjung --}}
     @php
         $sumPageviews = $record->visitors ? $record->visitors->sum('pageviews') : 0;
         $sumVisitors  = $record->visitors ? $record->visitors->sum('visitors') : 0;
@@ -92,10 +115,10 @@
     {{-- Actions --}}
     <td class="px-4 py-3.5 whitespace-nowrap w-px">
         @canany(['loker.update', 'loker.delete'])
-            <livewire:core.shared-components.item-actions 
+            <livewire:core.shared-components.item-actions
                 :editUrl="route('loker.loker.edit', $record->id)"
-                :deleteId="$record->id" 
-                :navigate="true" 
+                :deleteId="$record->id"
+                :navigate="true"
                 confirmMessage="{{ __('Yakin ingin menghapus lowongan ini?') }}"
                 wire:key="item-actions-{{ $record->id }}" />
         @endcanany

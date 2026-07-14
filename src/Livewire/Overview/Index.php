@@ -2,20 +2,50 @@
 
 namespace Bale\Loker\Livewire\Overview;
 
+use Bale\Cms\Services\TenantConnectionService;
+use Bale\Loker\Jobs\SyncLokerVisitorsJob;
+use Bale\Loker\Models\Category;
+use Bale\Loker\Models\Company;
 use Bale\Loker\Models\Loker;
+use Bale\Loker\Models\Type;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Bale\Cms\Services\TenantConnectionService;
-use Illuminate\Support\Facades\DB;
 
 #[Layout('cms::layouts.app')]
 #[Title('Statistik Lowongan Kerja')]
 class Index extends Component
 {
+    public int $chartDays = 30;
+
     public function mount(): void
     {
         TenantConnectionService::ensureActive();
+    }
+
+    public function updatedChartDays(): void
+    {
+        $this->dispatch('chartUpdated');
+    }
+
+    public function syncVisitors(): void
+    {
+        try {
+            $baleUuid = session('bale_active_uuid');
+
+            if (! $baleUuid) {
+                $this->dispatch('toast', message: __('Tenant tidak aktif.'), type: 'error');
+
+                return;
+            }
+
+            SyncLokerVisitorsJob::dispatch($baleUuid, $this->chartDays);
+
+            $this->dispatch('toast', message: __('Sinkronisasi data kunjungan sedang diproses.'), type: 'success');
+        } catch (\Throwable $e) {
+            $this->dispatch('toast', message: __('Gagal menjalankan sinkronisasi: ').$e->getMessage(), type: 'error');
+        }
     }
 
     public function render()
@@ -31,9 +61,9 @@ class Index extends Component
             'expired' => Loker::where(function ($q) {
                 $q->whereNotNull('tgl_berakhir')->where('tgl_berakhir', '<', now());
             })->count(),
-            'companies' => \Bale\Loker\Models\Company::on($connection)->count(),
-            'total_categories' => \Bale\Loker\Models\Category::on($connection)->count(),
-            'total_types' => \Bale\Loker\Models\Type::on($connection)->count(),
+            'companies' => Company::on($connection)->count(),
+            'total_categories' => Category::on($connection)->count(),
+            'total_types' => Type::on($connection)->count(),
         ];
 
         // Group by category
@@ -56,10 +86,9 @@ class Index extends Component
             ->get();
 
         // Latest entries
-        $latestLokers = Loker::latest()->take(6)->get();
+        $latestLokers = Loker::latest()->take(4)->get();
 
         // ── Visitor Analytics per-Loker ────────────────────────────────────
-        // Aggregate total kunjungan khusus loker_visitor
         $visitorAggregate = DB::connection($connection)
             ->table('loker_visitor')
             ->selectRaw('
@@ -72,6 +101,7 @@ class Index extends Component
         $topLokerByViews = DB::connection($connection)
             ->table('loker_visitor')
             ->join('loker', 'loker_visitor.loker_slug', '=', 'loker.slug')
+            ->whereNull('loker.deleted_at')
             ->select(
                 'loker.id',
                 'loker.slug',
@@ -85,42 +115,41 @@ class Index extends Component
             ->take(5)
             ->get();
 
-        // Chart 30 hari: harian aggregate semua loker
-        $chartDays = 30;
-        $timezone  = config('core.analytics.umami.timezone', 'Asia/Jakarta');
+        // Chart: harian aggregate semua loker
+        $chartDays = $this->chartDays;
+        $timezone = config('core.analytics.umami.timezone', 'Asia/Jakarta');
         $startDate = now($timezone)->subDays($chartDays - 1)->startOfDay()->format('Y-m-d');
 
         $rawChart = DB::connection($connection)
             ->table('loker_visitor')
-            ->selectRaw('date, SUM(pageviews) as pageviews, SUM(visitors) as visitors')
+            ->selectRaw('DATE_FORMAT(date, \'%Y-%m-%d\') as date_key, SUM(pageviews) as pageviews, SUM(visitors) as visitors')
             ->where('date', '>=', $startDate)
-            ->groupBy('date')
-            ->orderBy('date')
+            ->groupBy('date_key')
+            ->orderBy('date_key')
             ->get()
-            ->keyBy(fn ($row) => $row->date);
+            ->keyBy('date_key');
 
         $chartLabels = $chartPageviews = $chartVisitors = [];
         for ($i = $chartDays - 1; $i >= 0; $i--) {
             $day = now($timezone)->subDays($i);
             $key = $day->format('Y-m-d');
-            $chartLabels[]    = $day->format('M d');
+            $chartLabels[] = $day->format('M d');
             $chartPageviews[] = (int) ($rawChart->get($key)?->pageviews ?? 0);
-            $chartVisitors[]  = (int) ($rawChart->get($key)?->visitors ?? 0);
+            $chartVisitors[] = (int) ($rawChart->get($key)?->visitors ?? 0);
         }
 
         return view('loker::livewire.overview.index', [
-            'stats'             => $stats,
-            'byCategory'        => $byCategory,
-            'byType'            => $byType,
-            'topCompanies'      => $topCompanies,
-            'latestLokers'      => $latestLokers,
-            // visitor
-            'visitorAggregate'  => $visitorAggregate,
-            'topLokerByViews'   => $topLokerByViews,
-            'visitorChart'      => [
-                'labels'    => $chartLabels,
+            'stats' => $stats,
+            'byCategory' => $byCategory,
+            'byType' => $byType,
+            'topCompanies' => $topCompanies,
+            'latestLokers' => $latestLokers,
+            'visitorAggregate' => $visitorAggregate,
+            'topLokerByViews' => $topLokerByViews,
+            'visitorChart' => [
+                'labels' => $chartLabels,
                 'pageviews' => $chartPageviews,
-                'visitors'  => $chartVisitors,
+                'visitors' => $chartVisitors,
             ],
         ]);
     }

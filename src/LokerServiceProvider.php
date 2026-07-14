@@ -2,6 +2,12 @@
 
 namespace Bale\Loker;
 
+use Bale\Cms\Models\BaleList;
+use Bale\Loker\Commands\InstallLoker;
+use Bale\Loker\Commands\MigrateLoker;
+use Bale\Loker\Commands\SyncLokerVisitors;
+use Bale\Loker\Jobs\SyncLokerVisitorsJob;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Component as LivewireComponent;
@@ -12,7 +18,7 @@ class LokerServiceProvider extends ServiceProvider
 {
     /**
      * Method register()
-     * 
+     *
      * Digunakan untuk mendaftarkan service, binding, atau command
      * ke dalam service container Laravel.
      */
@@ -24,9 +30,9 @@ class LokerServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $commands = [
-            'command.loker:install' => \Bale\Loker\Commands\InstallLoker::class,
-            'command.loker:migrate' => \Bale\Loker\Commands\MigrateLoker::class,
-            'command.loker:sync-visitors' => \Bale\Loker\Commands\SyncLokerVisitors::class,
+            'command.loker:install' => InstallLoker::class,
+            'command.loker:migrate' => MigrateLoker::class,
+            'command.loker:sync-visitors' => SyncLokerVisitors::class,
         ];
 
         foreach ($commands as $key => $class) {
@@ -38,7 +44,7 @@ class LokerServiceProvider extends ServiceProvider
 
     /**
      * Method boot()
-     * 
+     *
      * Dipanggil setelah semua service diregistrasi.
      * Digunakan untuk load resource seperti:
      * - view
@@ -49,7 +55,7 @@ class LokerServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->booted(function () {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         });
 
         $this->registerViews();
@@ -57,6 +63,7 @@ class LokerServiceProvider extends ServiceProvider
         $this->offerPublishing();
         $this->registerLivewire4Namespaces();
         $this->registerLivewireComponents();
+        $this->registerSchedule();
     }
 
     /**
@@ -66,25 +73,25 @@ class LokerServiceProvider extends ServiceProvider
     {
         Livewire::addNamespace(
             'loker-pages',
-            __DIR__ . '/../resources/views/livewire/pages'
+            __DIR__.'/../resources/views/livewire/pages'
         );
     }
 
     /**
      * Load migration langsung dari package.
-     * 
+     *
      * Dengan ini, user bisa langsung menjalankan migration
      * tanpa harus publish file ke aplikasi utama.
      */
     protected function loadMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     protected function registerViews(): void
     {
         $this->loadViewsFrom(
-            __DIR__ . '/../resources/views',
+            __DIR__.'/../resources/views',
             'loker'
         );
     }
@@ -92,10 +99,9 @@ class LokerServiceProvider extends ServiceProvider
     /**
      * Publish file agar bisa diubah oleh user.
      */
-
     protected function offerPublishing(): void
     {
-        if (!$this->app->runningInConsole()) {
+        if (! $this->app->runningInConsole()) {
             return;
         }
 
@@ -109,15 +115,15 @@ class LokerServiceProvider extends ServiceProvider
     protected function getMigrations(): array
     {
         $migrations = [];
-        $sourcePath = __DIR__ . '/../database/migrations/';
+        $sourcePath = __DIR__.'/../database/migrations/';
 
         // Pastikan direktori ada
-        if (!is_dir($sourcePath)) {
+        if (! is_dir($sourcePath)) {
             return $migrations;
         }
 
         // Loop semua file migration (baik .php maupun .stub)
-        foreach (glob($sourcePath . '*.{php,stub}', GLOB_BRACE) as $file) {
+        foreach (glob($sourcePath.'*.{php,stub}', GLOB_BRACE) as $file) {
             $filename = basename($file);
 
             // Jika file stub, ganti menjadi nama migration yang benar di aplikasi
@@ -137,33 +143,46 @@ class LokerServiceProvider extends ServiceProvider
         $migrationName = str_replace('.php.stub', '.php', $filename);
         $migrationName = str_replace('.stub', '', $migrationName);
 
-        return database_path('migrations/loker/' . $migrationName);
+        return database_path('migrations/loker/'.$migrationName);
+    }
+
+    /**
+     * Registrasi schedule harian untuk sync visitor stats.
+     */
+    protected function registerSchedule(): void
+    {
+        Schedule::call(function () {
+            $tenants = BaleList::all();
+
+            foreach ($tenants as $tenant) {
+                SyncLokerVisitorsJob::dispatch($tenant->id);
+            }
+        })->dailyAt('02:00')->timezone('Asia/Jakarta');
     }
 
     /**
      * Registrasi semua Livewire Component yang ada di folder src/Livewire.
-     * 
+     *
      * Mekanisme:
      * - Cari semua file PHP di dalam folder Livewire
      * - Pastikan class tersebut adalah turunan Livewire\Component
      * - Buat alias secara otomatis dari struktur folder
-     * 
+     *
      * Contoh:
      *   src/Livewire/Dashboard.php
      *     => <livewire:loker.dashboard />
-     *
      */
     protected function registerLivewireComponents(): void
     {
-        $namespace = "Bale\\Loker\\Livewire";
-        $basePath = __DIR__ . "/Livewire";
+        $namespace = 'Bale\\Loker\\Livewire';
+        $basePath = __DIR__.'/Livewire';
 
         // Jika folder Livewire tidak ada, hentikan proses
-        if (!is_dir($basePath)) {
+        if (! is_dir($basePath)) {
             return;
         }
 
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()->in($basePath)->name('*.php');
 
         foreach ($finder as $file) {
@@ -173,24 +192,24 @@ class LokerServiceProvider extends ServiceProvider
             $nsPath = str_replace(['/', '\\'], '\\', $relativePathname);
 
             // Konversi ke FQCN (Fully Qualified Class Name)
-            $class = $namespace . '\\' . Str::beforeLast($nsPath, '.php');
+            $class = $namespace.'\\'.Str::beforeLast($nsPath, '.php');
 
             // Skip jika class tidak ditemukan
-            if (!class_exists($class)) {
+            if (! class_exists($class)) {
                 continue;
             }
 
             // Skip jika bukan turunan Livewire\Component
-            if (!is_subclass_of($class, LivewireComponent::class)) {
+            if (! is_subclass_of($class, LivewireComponent::class)) {
                 continue;
             }
 
             // Buat alias berdasarkan struktur folder (kebab-case)
             $withoutExt = Str::replaceLast('.php', '', $relativePathname);
             $segments = preg_split('#[\\/\\\\]#', $withoutExt);
-            $kebab = array_map(fn($s) => Str::kebab($s), $segments);
+            $kebab = array_map(fn ($s) => Str::kebab($s), $segments);
 
-            $alias = 'loker.' . implode('.', $kebab);
+            $alias = 'loker.'.implode('.', $kebab);
 
             // Registrasi komponen ke Livewire
             Livewire::component($alias, $class);

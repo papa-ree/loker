@@ -10,13 +10,18 @@
             'sortable' => true,
         ],
         [
-            'key' => 'nama_perusahaan',
-            'label' => __('Perusahaan'),
+            'key' => 'kategory',
+            'label' => __('Kategori'),
             'sortable' => true,
         ],
         [
             'key' => 'lokasi',
             'label' => __('Lokasi'),
+            'sortable' => true,
+        ],
+        [
+            'key' => 'gaji',
+            'label' => __('Gaji'),
             'sortable' => true,
         ],
         [
@@ -26,7 +31,7 @@
         ],
         [
             'key' => 'visitors',
-            'label' => __('Pengunjung (PV/UV)'),
+            'label' => __('Pengunjung'),
             'sortable' => false,
         ],
         [
