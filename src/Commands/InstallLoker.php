@@ -51,7 +51,8 @@ class InstallLoker extends Command
 
         } catch (Throwable $e) {
             $this->newLine();
-            $this->error('  [ERROR] Installation failed: ' . $e->getMessage());
+            $this->error('  [ERROR] Installation failed: '.$e->getMessage());
+
             return self::FAILURE;
         }
     }
@@ -87,7 +88,7 @@ class InstallLoker extends Command
         $this->info('Creating default roles...');
 
         $adminLoker = Role::firstOrCreate(
-            ['name'       => 'bale-loker-admin'],
+            ['name' => 'bale-loker-admin'],
             ['guard_name' => 'web'],
         );
         $adminLoker->syncPermissions(LokerPermissions::ALL);

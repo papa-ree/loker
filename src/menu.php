@@ -1,5 +1,7 @@
 <?php
 
+use Bale\Loker\LokerPermissions;
+
 return [
     [
         'id' => 'loker-overview',
@@ -7,8 +9,8 @@ return [
         'label' => 'Overview',
         'url' => 'loker/overview',
         'icon' => 'bar-chart-3',
-        'permission' => \Bale\Loker\LokerPermissions::VIEW_LOKER,
-        'table'      => 'loker',
+        'permission' => LokerPermissions::VIEW_LOKER,
+        'table' => 'loker',
     ],
     [
         'id' => 'loker-management',
@@ -16,8 +18,8 @@ return [
         'label' => 'Daftar Lowongan',
         'url' => 'loker',
         'icon' => 'briefcase',
-        'permission' => \Bale\Loker\LokerPermissions::VIEW_LOKER,
-        'table'      => 'loker',
+        'permission' => LokerPermissions::VIEW_LOKER,
+        'table' => 'loker',
     ],
     [
         'id' => 'loker-category',
@@ -25,8 +27,8 @@ return [
         'label' => 'Kategori Lowongan',
         'url' => 'loker/categories',
         'icon' => 'tag',
-        'permission' => \Bale\Loker\LokerPermissions::VIEW_CATEGORY,
-        'table'      => 'loker_categories',
+        'permission' => LokerPermissions::VIEW_CATEGORY,
+        'table' => 'loker_categories',
     ],
     [
         'id' => 'loker-type',
@@ -34,8 +36,8 @@ return [
         'label' => 'Tipe Pekerjaan',
         'url' => 'loker/types',
         'icon' => 'clock',
-        'permission' => \Bale\Loker\LokerPermissions::VIEW_TYPE,
-        'table'      => 'loker_types',
+        'permission' => LokerPermissions::VIEW_TYPE,
+        'table' => 'loker_types',
     ],
     [
         'id' => 'loker-company',
@@ -43,7 +45,7 @@ return [
         'label' => 'Manajemen Perusahaan',
         'url' => 'loker/companies',
         'icon' => 'building-2',
-        'permission' => \Bale\Loker\LokerPermissions::VIEW_COMPANY,
-        'table'      => 'loker_companies',
+        'permission' => LokerPermissions::VIEW_COMPANY,
+        'table' => 'loker_companies',
     ],
 ];

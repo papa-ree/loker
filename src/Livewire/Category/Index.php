@@ -2,11 +2,10 @@
 
 namespace Bale\Loker\Livewire\Category;
 
+use Bale\Cms\Services\TenantConnectionService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Bale\Loker\Models\Category;
-use Bale\Cms\Services\TenantConnectionService;
 
 #[Layout('cms::layouts.app')]
 #[Title('Kategori Lowongan')]

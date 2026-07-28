@@ -155,7 +155,14 @@ class LokerServiceProvider extends ServiceProvider
             $tenants = BaleList::all();
 
             foreach ($tenants as $tenant) {
-                SyncLokerVisitorsJob::dispatch($tenant->id);
+                try {
+                    \Bale\Cms\Services\TenantManager::initializeFromBaleUuid($tenant->id);
+                    if (\Illuminate\Support\Facades\Schema::hasTable('loker_visitor')) {
+                        SyncLokerVisitorsJob::dispatch($tenant->id);
+                    }
+                } catch (\Throwable $e) {
+                    continue;
+                }
             }
         })->dailyAt('02:00')->timezone('Asia/Jakarta');
     }

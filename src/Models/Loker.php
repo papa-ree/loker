@@ -3,6 +3,7 @@
 namespace Bale\Loker\Models;
 
 use Bale\Cms\Traits\UsesTenantConnection;
+use Bale\Core\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -10,9 +11,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Loker extends Model
 {
-    use UsesTenantConnection;
     use HasUuids;
+    use LogsActivity;
     use SoftDeletes;
+    use UsesTenantConnection;
 
     protected $table = 'loker';
 
@@ -46,7 +48,7 @@ class Loker extends Model
     protected function isExpired(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->tgl_berakhir && $this->tgl_berakhir->isPast(),
+            get: fn () => $this->tgl_berakhir && $this->tgl_berakhir->isPast(),
         );
     }
 
@@ -58,4 +60,3 @@ class Loker extends Model
         return $this->hasMany(LokerVisitor::class, 'loker_slug', 'slug');
     }
 }
-

@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LokerVisitor extends Model
 {
-    use UsesTenantConnection;
     use HasUuids;
+    use UsesTenantConnection;
 
     protected $table = 'loker_visitor';
 

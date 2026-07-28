@@ -3,15 +3,19 @@
 namespace Bale\Loker\Models;
 
 use Bale\Cms\Traits\UsesTenantConnection;
+use Bale\Core\Support\Cdn;
+use Bale\Core\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    use UsesTenantConnection;
     use HasUuids;
+    use LogsActivity;
     use SoftDeletes;
+    use UsesTenantConnection;
 
     protected $table = 'loker_companies';
 
@@ -32,10 +36,10 @@ class Company extends Model
     /**
      * Get logo URL from CDN
      */
-    protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function logoUrl(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn() => $this->logo ? \Bale\Core\Support\Cdn::url('logos/' . $this->logo) : null,
+        return Attribute::make(
+            get: fn () => $this->logo ? Cdn::url('logos/'.$this->logo) : null,
         );
     }
 }

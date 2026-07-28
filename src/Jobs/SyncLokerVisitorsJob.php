@@ -34,6 +34,10 @@ class SyncLokerVisitorsJob implements ShouldQueue
 
         TenantManager::initializeFromBaleUuid($tenant->id);
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('loker_visitor')) {
+            return;
+        }
+
         session(['bale_active_uuid' => $tenant->id]);
         session(['bale_active_slug' => $tenant->slug]);
 

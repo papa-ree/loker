@@ -2,12 +2,12 @@
 
 namespace Bale\Loker\Livewire\Company;
 
+use Bale\Cms\Services\TenantConnectionService;
 use Bale\Loker\Models\Company;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Bale\Cms\Services\TenantConnectionService;
-use Illuminate\Support\Str;
 
 #[Layout('cms::layouts.app')]
 class Form extends Component
@@ -16,21 +16,27 @@ class Form extends Component
 
     // Form fields
     public string $name = '';
+
     public string $slug = '';
+
     public ?string $logo = null;
+
     public ?string $website = null;
+
     public ?string $address = null;
+
     public ?string $description = null;
+
     public bool $actived = true;
 
     public function mount(?string $id = null): void
     {
         TenantConnectionService::ensureActive();
-        
+
         if ($id) {
             $this->companyId = $id;
             $company = Company::findOrFail($id);
-            
+
             $this->name = $company->name;
             $this->slug = $company->slug;
             $this->logo = $company->logo;
@@ -43,7 +49,7 @@ class Form extends Component
 
     public function updatedName($value): void
     {
-        if (!$this->companyId) {
+        if (! $this->companyId) {
             $this->slug = Str::slug($value);
         }
     }
@@ -55,7 +61,7 @@ class Form extends Component
 
         return [
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:' . $connection . '.loker_companies,slug,' . ($this->companyId ?? 'NULL') . ',id',
+            'slug' => 'required|string|unique:'.$connection.'.loker_companies,slug,'.($this->companyId ?? 'NULL').',id',
             'website' => 'nullable|url',
             'address' => 'nullable|string',
             'description' => 'nullable|string',
@@ -83,7 +89,8 @@ class Form extends Component
             ];
 
             if ($this->companyId) {
-                Company::on($connection)->where('id', $this->companyId)->update($data);
+                $company = Company::on($connection)->findOrFail($this->companyId);
+                $company->update($data);
                 $this->dispatch('toast', message: __('Perusahaan berhasil diperbarui!'), type: 'success');
             } else {
                 Company::on($connection)->create($data);
@@ -95,7 +102,7 @@ class Form extends Component
             $this->redirect(route('loker.company.index'), navigate: true);
         } catch (\Throwable $th) {
             \DB::rollBack();
-            info('Company save failed: ' . $th->getMessage());
+            info('Company save failed: '.$th->getMessage());
             $this->dispatch('toast', message: __('Terjadi kesalahan saat menyimpan data.'), type: 'error');
         }
     }
