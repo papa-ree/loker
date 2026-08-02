@@ -34,7 +34,8 @@ class SyncLokerVisitorsJob implements ShouldQueue
 
         TenantManager::initializeFromBaleUuid($tenant->id);
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('loker_visitor')) {
+        $connectionName = TenantManager::getActiveConnection();
+        if (!$connectionName || !\Illuminate\Support\Facades\Schema::connection($connectionName)->hasTable('loker_visitor')) {
             return;
         }
 

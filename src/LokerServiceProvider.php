@@ -157,7 +157,8 @@ class LokerServiceProvider extends ServiceProvider
             foreach ($tenants as $tenant) {
                 try {
                     \Bale\Cms\Services\TenantManager::initializeFromBaleUuid($tenant->id);
-                    if (\Illuminate\Support\Facades\Schema::hasTable('loker_visitor')) {
+                    $connectionName = \Bale\Cms\Services\TenantManager::getActiveConnection();
+                    if ($connectionName && \Illuminate\Support\Facades\Schema::connection($connectionName)->hasTable('loker_visitor')) {
                         SyncLokerVisitorsJob::dispatch($tenant->id);
                     }
                 } catch (\Throwable $e) {
