@@ -22,22 +22,29 @@ class InstallLoker extends Command
         $option = $this->choice(
             'What would you like to install/run?',
             [
-                0 => 'All (Migrations & Permissions)',
-                1 => 'Role & Permissions Only',
-                2 => 'Migrations Only',
+                0 => 'All (Config, Migrations & Permissions)',
+                1 => 'Publish Config Only',
+                2 => 'Role & Permissions Only',
+                3 => 'Migrations Only',
             ],
             0
         );
 
         try {
-            if ($option === 'All (Migrations & Permissions)' || $option === 'Role & Permissions Only' || $option === 0 || $option === 1) {
+            if ($option === 'All (Config, Migrations & Permissions)' || $option === 'Publish Config Only' || $option === 0 || $option === 1) {
+                $this->task('Publishing config file', function () {
+                    $this->call('loker:publish-config', ['--force' => true]);
+                });
+            }
+
+            if ($option === 'All (Config, Migrations & Permissions)' || $option === 'Role & Permissions Only' || $option === 0 || $option === 2) {
                 $this->task('Seeding permissions and roles', function () {
                     $this->seedPermissions();
                     $this->seedRoles();
                 });
             }
 
-            if ($option === 'All (Migrations & Permissions)' || $option === 'Migrations Only' || $option === 0 || $option === 2) {
+            if ($option === 'All (Config, Migrations & Permissions)' || $option === 'Migrations Only' || $option === 0 || $option === 3) {
                 $this->task('Running migrations', function () {
                     $this->call('loker:migrate');
                 });

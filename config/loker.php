@@ -8,7 +8,7 @@ return [
     | API
     |--------------------------------------------------------------------------
     |
-    | Konfigurasi endpoint `api/loker/v1`. Loker hanya tersedia dari tenant
+    | Konfigurasi endpoint `api/v1/loker`. Loker hanya tersedia dari tenant
     | yang ditentukan (tenant-scoped), default bale disnaker.
     |
     */

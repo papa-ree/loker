@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('bale.api')->prefix('api/loker/v1')->name('api.loker.v1.')->group(function () {
+Route::middleware('bale.api')->prefix('api/v1/loker')->name('api.loker.v1.')->group(function () {
     Route::get('lokers', [LokerController::class, 'index'])
         ->middleware('scope:loker.read')
         ->name('lokers.index');

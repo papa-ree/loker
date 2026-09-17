@@ -7,6 +7,7 @@ use Bale\Cms\Models\BaleList;
 use Bale\Cms\Services\TenantManager;
 use Bale\Loker\Commands\InstallLoker;
 use Bale\Loker\Commands\MigrateLoker;
+use Bale\Loker\Commands\PublishConfigLoker;
 use Bale\Loker\Commands\SyncLokerVisitors;
 use Bale\Loker\Jobs\SyncLokerVisitorsJob;
 use Illuminate\Support\Facades\Schedule;
@@ -37,6 +38,7 @@ class LokerServiceProvider extends ServiceProvider
         $commands = [
             'command.loker:install' => InstallLoker::class,
             'command.loker:migrate' => MigrateLoker::class,
+            'command.loker:publish-config' => PublishConfigLoker::class,
             'command.loker:sync-visitors' => SyncLokerVisitors::class,
         ];
 
@@ -130,8 +132,11 @@ class LokerServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->publishes($this->getMigrations(), 'loker:migrations');
+        $this->publishes([
+            __DIR__.'/../config/loker.php' => config_path('loker.php'),
+        ], 'loker:config');
 
+        $this->publishes($this->getMigrations(), 'loker:migrations');
     }
 
     /**

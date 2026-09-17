@@ -70,7 +70,7 @@ test('list loker default pagination 50 item', function () {
 
     $issued = $this->tokens->issue('Client', ['loker.read']);
 
-    $this->getJson('/api/loker/v1/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertOk()
         ->assertJsonStructure(['data', 'meta'])
         ->assertJsonCount(50, 'data')
@@ -87,7 +87,7 @@ test('list loker supports page parameter', function () {
 
     $issued = $this->tokens->issue('Client', ['loker.read']);
 
-    $this->getJson('/api/loker/v1/lokers?page=2', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers?page=2', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertOk()
         ->assertJsonPath('meta.current_page', 2)
         ->assertJsonCount(10, 'data');
@@ -100,7 +100,7 @@ test('inactive loker excluded from listing', function () {
 
     $issued = $this->tokens->issue('Client', ['loker.read']);
 
-    $this->getJson('/api/loker/v1/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertOk()
         ->assertJsonPath('meta.total', 2);
 });
@@ -112,7 +112,7 @@ test('expired loker excluded, future expiry included with is_expired flag', func
 
     $issued = $this->tokens->issue('Client', ['loker.read']);
 
-    $this->getJson('/api/loker/v1/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertOk()
         ->assertJsonPath('meta.total', 2)
         ->assertJsonPath('meta.per_page', 50)
@@ -124,7 +124,7 @@ test('per_page override is capped at config max', function () {
 
     $issued = $this->tokens->issue('Client', ['loker.read']);
 
-    $this->getJson('/api/loker/v1/lokers?per_page=1000', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers?per_page=1000', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertOk()
         ->assertJsonPath('meta.per_page', 100);
 });
@@ -132,12 +132,12 @@ test('per_page override is capped at config max', function () {
 test('token without loker.read ability is forbidden', function () {
     $issued = $this->tokens->issue('Client', ['rakaca.form.read']);
 
-    $this->getJson('/api/loker/v1/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertForbidden();
 });
 
 test('missing token is unauthorized', function () {
-    $this->getJson('/api/loker/v1/lokers')->assertUnauthorized();
+    $this->getJson('/api/v1/loker/lokers')->assertUnauthorized();
 });
 
 test('unknown tenant slug returns 404', function () {
@@ -151,7 +151,7 @@ test('unknown tenant slug returns 404', function () {
 
     $issued = $this->tokens->issue('Client', ['loker.read']);
 
-    $this->getJson('/api/loker/v1/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
+    $this->getJson('/api/v1/loker/lokers', ['Authorization' => 'Bearer '.$issued['plain']])
         ->assertNotFound()
         ->assertJsonPath('message', 'Tenant with slug [unknown-tenant] not found.');
 });
