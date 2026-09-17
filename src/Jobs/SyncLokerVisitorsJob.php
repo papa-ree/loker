@@ -13,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class SyncLokerVisitorsJob implements ShouldQueue
@@ -35,7 +36,7 @@ class SyncLokerVisitorsJob implements ShouldQueue
         TenantManager::initializeFromBaleUuid($tenant->id);
 
         $connectionName = TenantManager::getActiveConnection();
-        if (!$connectionName || !\Illuminate\Support\Facades\Schema::connection($connectionName)->hasTable('loker_visitor')) {
+        if (! $connectionName || ! Schema::connection($connectionName)->hasTable('loker_visitor')) {
             return;
         }
 

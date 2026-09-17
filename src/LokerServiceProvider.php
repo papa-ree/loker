@@ -2,12 +2,15 @@
 
 namespace Bale\Loker;
 
+use Bale\Api\Http\Controllers\Api\BaseApiController;
 use Bale\Cms\Models\BaleList;
+use Bale\Cms\Services\TenantManager;
 use Bale\Loker\Commands\InstallLoker;
 use Bale\Loker\Commands\MigrateLoker;
 use Bale\Loker\Commands\SyncLokerVisitors;
 use Bale\Loker\Jobs\SyncLokerVisitorsJob;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Component as LivewireComponent;
@@ -24,6 +27,8 @@ class LokerServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../config/loker.php', 'loker');
+
         $this->registerCommands();
     }
 
@@ -54,8 +59,14 @@ class LokerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerApiScopes();
+
         $this->app->booted(function () {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+
+            if (class_exists(BaseApiController::class)) {
+                $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+            }
         });
 
         $this->registerViews();
@@ -64,6 +75,20 @@ class LokerServiceProvider extends ServiceProvider
         $this->registerLivewire4Namespaces();
         $this->registerLivewireComponents();
         $this->registerSchedule();
+    }
+
+    /**
+     * Daftarkan scope API milik loker ke registry bale/api.
+     */
+    protected function registerApiScopes(): void
+    {
+        if (! function_exists('registerApiScopes')) {
+            return;
+        }
+
+        registerApiScopes('loker', [
+            'loker.read' => 'Membaca daftar loker aktif dari tenant.',
+        ]);
     }
 
     /**
@@ -156,9 +181,9 @@ class LokerServiceProvider extends ServiceProvider
 
             foreach ($tenants as $tenant) {
                 try {
-                    \Bale\Cms\Services\TenantManager::initializeFromBaleUuid($tenant->id);
-                    $connectionName = \Bale\Cms\Services\TenantManager::getActiveConnection();
-                    if ($connectionName && \Illuminate\Support\Facades\Schema::connection($connectionName)->hasTable('loker_visitor')) {
+                    TenantManager::initializeFromBaleUuid($tenant->id);
+                    $connectionName = TenantManager::getActiveConnection();
+                    if ($connectionName && Schema::connection($connectionName)->hasTable('loker_visitor')) {
                         SyncLokerVisitorsJob::dispatch($tenant->id);
                     }
                 } catch (\Throwable $e) {
