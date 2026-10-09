@@ -1,84 +1,62 @@
-# Job Vacancy for bale cms
+# bale/loker
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/bale/loker.svg?style=flat-square)](https://packagist.org/packages/bale/loker)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/bale/loker/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/bale/loker/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/bale/loker/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/bale/loker/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/bale/loker.svg?style=flat-square)](https://packagist.org/packages/bale/loker)
+Package fitur **Job Vacancy (Loker)** untuk `bale/cms`. Menyediakan pengelolaan
+lowongan kerja beserta kategori, tipe lowongan, dan perusahaan di dalam CMS
+multi-tenant. Seluruh data berada pada **koneksi tenant** (aktif), bukan landlord.
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+## Kebutuhan
 
-## Support us
+| Dependency | Alasan |
+|------------|--------|
+| `bale/cms` | Multi-tenancy, `SwitchBaleConnection`, `EnsureBaleSelected`, komponen CMS |
+| `bale/core` | Auth, permission, komponen UI, layout |
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/loker.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/loker)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
-
-## Installation
-
-You can install the package via composer:
+## Instalasi
 
 ```bash
 composer require bale/loker
 ```
 
-You can publish and run the migrations with:
-
 ```bash
-php artisan vendor:publish --tag="loker-migrations"
+php artisan vendor:publish --tag="loker:migrations"
 php artisan migrate
 ```
 
-You can publish the config file with:
-
 ```bash
-php artisan vendor:publish --tag="loker-config"
+php artisan vendor:publish --tag="loker:config"
 ```
 
-This is the contents of the published config file:
+## Command
 
-```php
-return [
-];
-```
+| Command | Fungsi |
+|---------|--------|
+| `loker:install` | Seed permission, kategori, dan tipe lowongan bawaan |
+| `loker:migrate` | Publish lalu jalankan migration Loker |
+| `loker:publish-config` | Publish `config/loker.php` |
+| `loker:sync-visitors` | Sinkronisasi data visitor lowongan |
 
-Optionally, you can publish the views using
+## Routing
 
-```bash
-php artisan vendor:publish --tag="loker-views"
-```
+Semua route berada di bawah prefix `cms/loker`, middleware `web` + `auth`, dan
+di-guard oleh `EnsureBaleSelected` + `SwitchBaleConnection`.
 
-## Usage
-
-```php
-$loker = new Bale\Loker();
-echo $loker->echoPhrase('Hello, Bale!');
-```
+| Path | Nama route | Keterangan |
+|------|------------|------------|
+| `GET /cms/loker/overview` | `loker.overview` | Dashboard lowongan |
+| `GET /cms/loker` | `loker.loker.index` | Daftar lowongan |
+| `GET /cms/loker/create` | `loker.loker.create` | Form lowongan |
+| `GET /cms/loker/edit/{id}` | `loker.loker.edit` | Edit lowongan |
+| `GET /cms/loker/categories` | `loker.category.index` | Kategori lowongan |
+| `GET /cms/loker/types` | `loker.type.index` | Tipe lowongan |
+| `GET /cms/loker/companies` | `loker.company.index` | Perusahaan |
+| `POST /cms/loker/sync-visitors` | `loker.sync-visitors` | Trigger sinkronisasi visitor |
 
 ## Testing
 
 ```bash
-composer test
+vendor\bin\pest packages\loker
 ```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [bale](https://github.com/bale)
-- [All Contributors](../../contributors)
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+MIT. Lihat [LICENSE.md](LICENSE.md).
