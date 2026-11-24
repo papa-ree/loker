@@ -4,6 +4,7 @@ namespace Bale\Loker\Tests;
 
 use Bale\Api\ApiServiceProvider;
 use Bale\Cms\CmsServiceProvider;
+use Bale\Cms\Services\TenantManager;
 use Bale\Core\CoreServiceProvider;
 use Bale\Loker\LokerServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -36,6 +37,15 @@ class TestCase extends Orchestra
 
         $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
         $app['config']->set('auth.defaults.guard', 'web');
+    }
+
+    protected function tearDown(): void
+    {
+        // State statis tenant bocor antar tes dalam satu proses dan bisa
+        // mengarahkan koneksi default ke MySQL development.
+        TenantManager::clear();
+
+        parent::tearDown();
     }
 
     protected function setUp(): void

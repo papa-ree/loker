@@ -1,6 +1,6 @@
 <?php
 
 use Bale\Loker\Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\RefreshTestDatabaseSafely;
 
-uses(TestCase::class, RefreshDatabase::class)->in('Feature');
+uses(TestCase::class, RefreshTestDatabaseSafely::class)->in('Feature');
